@@ -225,6 +225,7 @@ def edit_post(post_id):
         post.subtitle = edit_form.subtitle.data
         post.img_url = edit_form.img_url.data
         post.body = edit_form.body.data
+
         db.session.commit()
         return redirect(url_for("show_post", post_id=post.id))
 
@@ -236,9 +237,10 @@ def edit_post(post_id):
 def delete_post(post_id):
     post_to_delete = db.session.query(BlogPost).get(post_id)
     db.session.delete(post_to_delete)
+
     db.session.commit()
     return redirect(url_for('get_all_posts'))
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
