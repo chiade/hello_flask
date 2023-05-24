@@ -9,7 +9,6 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 from flask_gravatar import Gravatar
 from functools import wraps
-from flask import abort
 import os
 
 db = SQLAlchemy()
@@ -36,9 +35,9 @@ def load_user(user_id):
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    name = db.Column(db.String(100))
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
 
     #This will act like a List of BlogPost objects attached to each User.
     #The "author" refers to the author property in the BlogPost class.
@@ -119,7 +118,7 @@ def register():
         user = User()
         user.email=form.email.data
         user.name=form.name.data
-        password=hash_and_salted_password
+        user.password=hash_and_salted_password
 
         db.session.add(user)
         db.session.commit()
@@ -200,7 +199,7 @@ def add_new_post():
             subtitle=form.subtitle.data,
             body=form.body.data,
             img_url=form.img_url.data,
-            author_id=current_user.id,
+            author=current_user,
             date=date.today().strftime("%B %d, %Y")
         )
         db.session.add(new_post)
