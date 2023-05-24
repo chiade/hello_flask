@@ -41,8 +41,8 @@ class User(UserMixin, db.Model):
 
     #This will act like a List of BlogPost objects attached to each User.
     #The "author" refers to the author property in the BlogPost class.
-    posts = relationship("BlogPost", back_populates="author")
-    comments = relationship("Comment", back_populates="comment_author")
+    posts = relationship("BlogPost", backref="blog_posts", lazy=True)
+    comments = relationship("Comment", backref="comments", lazy=True)
 
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
@@ -51,7 +51,7 @@ class BlogPost(db.Model):
     # Create Foreign Key, "users.id" the users refers to the tablename of User.
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     # Create reference to the User object, the "posts" refers to the posts property in the User class.
-    author = relationship("User", back_populates="posts")
+    author = relationship("User", backref="users", lazy=True)
 
     title = db.Column(db.String(250), unique=True, nullable=False)
     subtitle = db.Column(db.String(250), nullable=False)
@@ -60,7 +60,7 @@ class BlogPost(db.Model):
     img_url = db.Column(db.String(250), nullable=False)
 
     # ***************Parent Relationship*************#
-    comments = relationship("Comment", back_populates="parent_post")
+    comments = relationship("Comment", backref="blog_posts", lazy=True)
 
 class Comment(db.Model):
     __tablename__ = "comments"
@@ -70,11 +70,11 @@ class Comment(db.Model):
     # "users.id" The users refers to the tablename of the Users class.
     # "comments" refers to the comments property in the User class.
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    comment_author = relationship("User", back_populates="comments")
+    comment_author = relationship("User", backref="blog_posts", lazy=True)
 
     # ***************Child Relationship*************#
     post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"))
-    parent_post = relationship("BlogPost", back_populates="comments")
+    parent_post = relationship("BlogPost", backref="users", lazy=True)
     text = db.Column(db.Text, nullable=False)
 
 with app.app_context():
@@ -199,7 +199,8 @@ def add_new_post():
             subtitle=form.subtitle.data,
             body=form.body.data,
             img_url=form.img_url.data,
-            author=current_user,
+            author_id=current_user.id,
+            # author=current_user,
             date=date.today().strftime("%B %d, %Y")
         )
         db.session.add(new_post)
