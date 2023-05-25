@@ -53,9 +53,11 @@ class BlogPost(db.Model):
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
+    author_name = db.Column(db.String(250), nullable=False)
+
 
     # Create Foreign Key, "users.id" the users refers to the tablename of User.
-    author_name = db.Column(db.String(250), db.ForeignKey("users.name"))
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     # Create reference to the User object, the "posts" refers to the posts property in the User class.
     author = db.relationship("User", back_populates="posts")
@@ -199,7 +201,7 @@ def add_new_post():
             subtitle=form.subtitle.data,
             body=form.body.data,
             img_url=form.img_url.data,
-            author_name=current_user.name,
+            author_name=form.author_name.data,
             date=date.today().strftime("%B %d, %Y")
         )
         db.session.add(new_post)
@@ -216,7 +218,7 @@ def edit_post(post_id):
         title=post.title,
         subtitle=post.subtitle,
         img_url=post.img_url,
-        author=current_user,
+        author_name=post.author_name,
         body=post.body
     )
     if edit_form.validate_on_submit():
@@ -224,6 +226,7 @@ def edit_post(post_id):
         post.subtitle = edit_form.subtitle.data
         post.img_url = edit_form.img_url.data
         post.body = edit_form.body.data
+        post.author_name = edit_form.author_name.data
 
         db.session.commit()
         return redirect(url_for("show_post", post_id=post.id))
