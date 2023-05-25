@@ -21,7 +21,7 @@ Bootstrap(app)
 gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
 
 ##CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///blog.db")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", "sqlite:///blog.db").replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
@@ -48,18 +48,17 @@ class User(UserMixin, db.Model):
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
     id = db.Column(db.Integer, primary_key=True)
-
-    # Create Foreign Key, "users.id" the users refers to the tablename of User.
-    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    # Create reference to the User object, the "posts" refers to the posts property in the User class.
-    author = db.relationship("User", back_populates="posts")
-
     title = db.Column(db.String(250), unique=True, nullable=False)
     subtitle = db.Column(db.String(250), nullable=False)
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
 
+    # Create Foreign Key, "users.id" the users refers to the tablename of User.
+    author_name = db.Column(db.Integer, db.ForeignKey("users.name"))
+
+    # Create reference to the User object, the "posts" refers to the posts property in the User class.
+    author = db.relationship("User", back_populates="posts")
     # ***************Parent Relationship*************#
     comments = db.relationship("Comment", back_populates="parent_post")
 
@@ -170,7 +169,7 @@ def show_post(post_id):
 
         new_comment = Comment(
             text=form.comment_text.data,
-            author_id=current_user.id,
+            comment_author=current_user,
             parent_post_id=post_id
         )
         db.session.add(new_comment)
@@ -200,7 +199,7 @@ def add_new_post():
             subtitle=form.subtitle.data,
             body=form.body.data,
             img_url=form.img_url.data,
-            author=current_user,
+            author_name=current_user.name,
             date=date.today().strftime("%B %d, %Y")
         )
         db.session.add(new_post)
