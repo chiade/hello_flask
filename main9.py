@@ -55,7 +55,7 @@ class BlogPost(db.Model):
     img_url = db.Column(db.String(250), nullable=False)
 
     # Create Foreign Key, "users.id" the users refers to the tablename of User.
-    author_name = db.Column(db.Integer, db.ForeignKey("users.name"))
+    author_name = db.Column(db.String(250), db.ForeignKey("users.name"))
 
     # Create reference to the User object, the "posts" refers to the posts property in the User class.
     author = db.relationship("User", back_populates="posts")
