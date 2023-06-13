@@ -15,6 +15,7 @@
             <h2 class="subheading">{{post.subtitle}}</h2>
             <span class="meta">Posted by
 <!--              #Changed from post.author-->
+<!--              {{post.author_name}}-->
               {{post.author.name}}
               on {{post.date}}</span>
           </div>
@@ -45,7 +46,7 @@
 <!--          Configure it with the name of the form field from CommentForm-->
             {{ ckeditor.config(name='comment_text') }}
 <!--          Create the wtf quickform from CommentForm-->
-            {{ wtf.quick_form(form, novalidate=True, button-map={"submit": "primary"}) }}
+            {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
 
           <div class="col-lg-8 col-md-10 mx-auto comment">
             {% for comment in post.comments: %}

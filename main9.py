@@ -53,8 +53,7 @@ class BlogPost(db.Model):
     date = db.Column(db.String(250), nullable=False)
     body = db.Column(db.Text, nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
-    author_name = db.Column(db.String(250), nullable=False)
-
+    # author_name = db.Column(db.String(250), nullable=False)
 
     # Create Foreign Key, "users.id" the users refers to the tablename of User.
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -95,15 +94,14 @@ def admin_only(f):
 
 @app.route('/')
 def get_all_posts():
-    with app.app_context():
-        posts = db.session.query(BlogPost).all()
+    # with app.app_context():
+    posts = db.session.query(BlogPost).all()
     return render_template("index9.html", all_posts=posts, current_user=current_user)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-
         #If user's email already exists
         user = db.session.query(User).filter_by(email=form.email.data).first()
         if user:
@@ -172,7 +170,7 @@ def show_post(post_id):
         new_comment = Comment(
             text=form.comment_text.data,
             comment_author=current_user,
-            parent_post_id=post_id
+            parent_post=post_id
         )
         db.session.add(new_comment)
         db.session.commit()
@@ -201,7 +199,8 @@ def add_new_post():
             subtitle=form.subtitle.data,
             body=form.body.data,
             img_url=form.img_url.data,
-            author_name=form.author_name.data,
+            # author_name=form.author_name.data,
+            author=current_user,
             date=date.today().strftime("%B %d, %Y")
         )
         db.session.add(new_post)
@@ -218,7 +217,8 @@ def edit_post(post_id):
         title=post.title,
         subtitle=post.subtitle,
         img_url=post.img_url,
-        author_name=post.author_name,
+        # author_name=post.author_name,
+        author=current_user,
         body=post.body
     )
     if edit_form.validate_on_submit():
@@ -226,7 +226,7 @@ def edit_post(post_id):
         post.subtitle = edit_form.subtitle.data
         post.img_url = edit_form.img_url.data
         post.body = edit_form.body.data
-        post.author_name = edit_form.author_name.data
+        # post.author_name = edit_form.author_name
 
         db.session.commit()
         return redirect(url_for("show_post", post_id=post.id))
